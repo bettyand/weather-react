@@ -20,9 +20,61 @@ function Temp(props) {
   }
 
   return (
-    <p>{convertedTemp} &deg;{unit}</p>
+    <>{convertedTemp} &deg;{unit}</>
   )
+}
 
+function DisplayData(props) {
+  const { data } = props;
+  const { current, daily } = data;
+
+  const dateTime = new Date(current.dt * 1000).toLocaleString();
+  const sunrise = new Date(current.sunrise * 1000).toLocaleTimeString();
+  const sunset = new Date(current.sunset * 1000).toLocaleTimeString();
+  const windDir = (degrees) =>  {
+    const directions = ['↑ N', '↗ NE', '→ E', '↘ SE', '↓ S', '↙ SW', '← W', '↖ NW'];
+    return directions[Math.round(degrees / 45) % 8];
+  }
+  const windSpeed = (speed) => {
+    if (props.units === "imperial") {
+      return Math.round(speed * 2.23694);
+    } else {
+      return Math.round(speed);
+    }
+  }
+  let windUnits;
+  if (props.units === "imperial") {
+    windUnits = "mph";
+  } else {
+    windUnits = "m/s";
+  }
+
+  const icon = `https://openweathermap.org/img/wn/${current.weather[0].icon}.png`;
+  
+  return (
+    <div className="displayData">
+      <h1>Weather in {props.city}</h1>
+      <h2>{dateTime}</h2>
+      <div className="currtemp">
+        <p><Temp temp={data.current.temp} units={props.units}/></p>
+        <p>Feels Like <Temp temp={current.feels_like}  units={props.units}/></p>
+      </div>
+      <div className="cond">
+      <img src={icon} alt="" />
+        <p>{current.weather[0].main}</p>
+      </div>
+      <div className="hilo">
+        <p>High: <Temp temp={daily[0].temp.max}  units={props.units}/></p>
+        <p>Low: <Temp temp={daily[0].temp.min}  units={props.units}/></p>
+      </div>
+      <p>Humidity: {current.humidity}%</p>
+      <p>{windSpeed(current.wind_speed)}{windUnits} winds from the {windDir(current.wind_deg)}</p>
+      <div className="sun">
+        <p>Sunrise at {sunrise}</p>
+        <p>Sunset at {sunset}</p>
+      </div>
+    </div>
+  )
 }
 
 class App extends React.Component {
@@ -39,7 +91,7 @@ class App extends React.Component {
 
   getWithLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
-      fetch("http://api.openweathermap.org/geo/1.0/reverse?lat=" + position.coords.latitude + "&lon=" + position.coords.longitude + "&limit=1&appid=" + this.key)
+      fetch("https://api.openweathermap.org/geo/1.0/reverse?lat=" + position.coords.latitude + "&lon=" + position.coords.longitude + "&limit=1&appid=" + this.key)
       .then(response => response.json())
       .then(res => this.getWeather(res[0]))
     })
@@ -54,7 +106,7 @@ class App extends React.Component {
 
   getWithCity() {
     let city = document.querySelector("#getwcity").value;
-    fetch("http://api.openweathermap.org/geo/1.0/direct?q=" + city + "&appid=" + this.key)
+    fetch("https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&appid=" + this.key)
     .then(response => response.json())
     .then(res => this.getWeather(res[0]));
   }
@@ -83,6 +135,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
+        {!this.state.weatherData && <h2>How should I retrieve your weather?</h2>}
         <div className="input">
           <Button onClick={() => this.getWithLocation()} text="Use My Location" />
           <br/>
@@ -94,9 +147,7 @@ class App extends React.Component {
           <br/>
           <Button onClick={() => this.changeUnits()} text="Change Units" />
         </div>
-        <div className="info">
-          {this.state.weatherData && <Temp temp={this.state.weatherData.current.temp} units={this.state.units} />}
-        </div>
+          {this.state.weatherData && <DisplayData units={this.state.units} city={this.state.city} data={this.state.weatherData}/>}
       </div>
     );
   }
