@@ -56,12 +56,12 @@ function DisplayData(props) {
       <h1>Weather in {props.city}</h1>
       <h2>{dateTime}</h2>
       <div className="currtemp">
-        <p><Temp temp={data.current.temp} units={props.units}/></p>
+        <p className="bigtemp"><Temp temp={data.current.temp} units={props.units}/></p>
         <p>Feels Like <Temp temp={current.feels_like}  units={props.units}/></p>
       </div>
       <div className="cond">
-      <img src={icon} alt="" />
-        <p>{current.weather[0].main}</p>
+      <img id="cond-icon" src={icon} alt="" />
+        <p id="cond-descrip">{current.weather[0].main}</p>
       </div>
       <div className="hilo">
         <p>High: <Temp temp={daily[0].temp.max}  units={props.units}/></p>
@@ -77,6 +77,38 @@ function DisplayData(props) {
   )
 }
 
+function FutureDay(props) {
+  const { today } = props;
+
+  const date = new Date(today.dt * 1000).toLocaleDateString();
+
+  const icon = today.weather[0].icon;
+  const iconURL = `https://openweathermap.org/img/wn/${icon}.png`;
+
+  return (
+  <div className="extend1">
+    <p>{date}</p>
+    <img src={iconURL} alt=""/>
+    <p><Temp temp={today.temp.max} units={props.units}/> / <Temp temp={today.temp.min} units={props.units}/></p>
+    <p>Feels Like <Temp temp={today.feels_like.day} units={props.units} /></p>
+  </div>
+  )
+}
+
+function ExtendedForecast(props) {
+  const { daily } = props;
+
+  return (
+    <div className="extend3">
+      <FutureDay today={daily[1]} units={props.units} />
+      <hr />
+      <FutureDay today={daily[2]} units={props.units} />
+      <hr />
+      <FutureDay today={daily[3]} units={props.units} />
+    </div>
+  )
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -85,6 +117,7 @@ class App extends React.Component {
       city: null,
       units: "imperial",
       weatherData: null,
+      extended: false,
     }
     this.key = "09040523d49139cfae82b17a00c7ec08"
   }
@@ -132,10 +165,17 @@ class App extends React.Component {
     }
   }
 
+  showExtended() {
+    this.setState({
+      extended: true,
+    })
+  }
+
   render() {
     return (
       <div className="App">
-        {!this.state.weatherData && <h2>How should I retrieve your weather?</h2>}
+        <div className="main">
+          {!this.state.weatherData && <h2>How should I retrieve your weather?</h2>}
         <div className="input">
           <Button onClick={() => this.getWithLocation()} text="Use My Location" />
           <br/>
@@ -147,7 +187,11 @@ class App extends React.Component {
           <br/>
           <Button onClick={() => this.changeUnits()} text="Change Units" />
         </div>
-          {this.state.weatherData && <DisplayData units={this.state.units} city={this.state.city} data={this.state.weatherData}/>}
+          {this.state.weatherData && <DisplayData units={this.state.units} city={this.state.city} data={this.state.weatherData} />}
+        </div>
+        <div>
+          {this.state.weatherData && <ExtendedForecast daily={this.state.weatherData.daily} units={this.state.units}/>}
+        </div>
       </div>
     );
   }

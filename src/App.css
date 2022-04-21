@@ -1,0 +1,72 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://source.unsplash.com/1600x900/?weather');
+}
+
+.App {
+    font-family: sans-serif;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.main, .extend3 {
+    background-color: black;
+    opacity: .7;    
+    padding: 30px;
+}
+
+.input {
+    text-align: center;
+}
+
+button, input {
+    border: none;
+    border-radius: 15px;
+    margin-top: 10px;
+    padding: 7px;
+}
+
+input {
+    margin-right: 5px;
+    text-align: center;
+}
+
+button {
+    font-weight: 600;
+}
+
+.bigtemp {
+    font-size: 3em;
+    margin: 5px;
+}
+
+#cond-icon {
+    animation: float 2s ease-in-out 0s infinite alternate;
+}
+
+@keyframes float {
+    0% {transform:translateY(-5px)}
+    100% {transform:translateY(5px)}
+}
+
+#cond-descrip {
+    font-weight: 600;
+}
+
+.extend3 {
+    text-align: center;
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    font-size: .75em;
+}
